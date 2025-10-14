@@ -20,8 +20,9 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-manrope)", "sans-serif"],
-        heading: ["var(--font-heading)", "sans-serif"],
+        sans: ["var(--font-manrope)", "sans-serif"], // Keep existing sans font
+        heading: ["var(--font-heading)", "sans-serif"], // Keep existing heading font
+        poppins: ["Poppins", "sans-serif"], // Add Poppins as a new font family
       },
       colors: {
         border: "hsl(var(--border))",

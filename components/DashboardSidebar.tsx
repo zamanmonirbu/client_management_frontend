@@ -1,4 +1,4 @@
-//Compoenent: @compoenent/DashboardSidebar
+// Component: @component/DashboardSidebar
 "use client"
 
 import React, { useState } from "react"
@@ -121,7 +121,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      {/* AppBar */}
       <AppBar
         position="fixed"
         sx={{
@@ -131,43 +130,75 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           zIndex: (theme) => theme.zIndex.drawer + 1,
         }}
       >
-        <Toolbar sx={{ justifyContent: "space-between", minHeight: APPBAR_HEIGHT, px: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <Box sx={{ mt: 1 }}> {/* Add margin top */}
+        <Toolbar
+          sx={{
+            justifyContent: "space-between",
+            minHeight: APPBAR_HEIGHT,
+            px: { xs: 1, sm: 2 },
+          }}
+        >
+          {/* Left Section (Logo + Menu) */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* Logo - Always visible */}
+            <Box sx={{ display: { xs: "flex", sm: "flex" }, alignItems: "center" }}>
               <Image
                 src="/seologo.png"
                 alt="Dashboard Logo"
-                width={200}
-                height={40}
-                style={{ objectFit: "contain" }}
+                width={205}
+                height={53.33}
+                style={{
+                  objectFit: "contain",
+                  display: "block",
+                  maxWidth: "100%",
+                  marginTop: 6,
+                }}
               />
             </Box>
 
-            <Image
-              src="/menu.png"
-              alt="Menu"
-              width={30}
-              height={30}
-              style={{ objectFit: "contain" }}
-            />
+            {/* Menu Icon - Always visible with responsive size */}
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{
+                display: { xs: "flex", sm: "flex" },
+                color: "#FFFFFF",
+                width: { xs: 34, sm: 48 },
+                height: { xs: 34, sm: 48 },
+                "&:hover": { bgcolor: "#3b4336" },
+                ml: { xs: 0.5, sm: 1 }, // Adjusted margin-left for spacing
+              }}
+            >
+              <Image
+                src="/menu.png"
+                alt="Menu"
+                width={24}
+                height={24}
+                style={{ objectFit: "contain" }}
+              />
+            </IconButton>
           </Box>
 
-
-          {/* Right Section */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {/* Right Section (Icons + Profile) */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 1, sm: 1.5 },
+            }}
+          >
             <IconButton
               color="inherit"
               size="small"
               sx={{
                 bgcolor: "#4D5746",
                 color: "#FFFFFF",
-                width: 34,
-                height: 34,
-                p: 1,
+                width: 32,
+                height: 32,
                 "&:hover": { bgcolor: "#3b4336" },
               }}
             >
-              <AdbOutlined />
+              <AdbOutlined fontSize="small" />
             </IconButton>
 
             <IconButton
@@ -176,14 +207,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               sx={{
                 bgcolor: "#4D5746",
                 color: "#FFFFFF",
-                width: 34,
-                height: 34,
-                p: 1,
+                width: 32,
+                height: 32,
                 "&:hover": { bgcolor: "#3b4336" },
               }}
             >
               <Badge badgeContent={3} color="error">
-                <NotificationsIcon />
+                <NotificationsIcon fontSize="small" />
               </Badge>
             </IconButton>
 
@@ -193,27 +223,47 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               sx={{
                 bgcolor: "#4D5746",
                 color: "#FFFFFF",
-                width: 34,
-                height: 34,
-                p: 1,
+                width: 32,
+                height: 32,
                 "&:hover": { bgcolor: "#3b4336" },
               }}
             >
-              <SettingsIcon />
+              <SettingsIcon fontSize="small" />
             </IconButton>
 
             {/* Profile Dropdown */}
             <Box
-              sx={{ display: "flex", alignItems: "center", cursor: "pointer", ml: 1 }}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                ml: 0.5,
+              }}
               onClick={handleProfileClick}
             >
-              <Avatar sx={{ width: 32, height: 32, bgcolor: "#6d7e6c", fontSize: "14px", mr: 1 }}>
+              <Avatar
+                sx={{
+                  width: 30,
+                  height: 30,
+                  bgcolor: "#6d7e6c",
+                  fontSize: "13px",
+                  mr: 0.5,
+                }}
+              >
                 {authUser?.name?.[0] || "U"}
               </Avatar>
-              <span style={{ color: "white", fontSize: "14px", fontWeight: 500, marginRight: 4 }}>
+              <Box
+                sx={{
+                  display: { xs: "none", sm: "block" },
+                  color: "white",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  mr: 0.5,
+                }}
+              >
                 {authUser?.name || "User"}
-              </span>
-              <ExpandMoreIcon sx={{ color: "white", fontSize: 20 }} />
+              </Box>
+              <ExpandMoreIcon sx={{ color: "white", fontSize: 18 }} />
             </Box>
 
             <Menu
@@ -226,13 +276,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </Box>
-
         </Toolbar>
       </AppBar>
 
       {/* Sidebar */}
       <Box component="nav" sx={{ width: { sm: DRAWER_WIDTH }, flexShrink: { sm: 0 } }}>
-        {/* Mobile Drawer */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -246,7 +294,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {drawer}
         </Drawer>
 
-        {/* Permanent Drawer */}
         <Drawer
           variant="permanent"
           sx={{
@@ -259,7 +306,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </Drawer>
       </Box>
 
-      {/* Main Content */}
       <Box
         component="main"
         sx={{
@@ -271,7 +317,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           pb: 3,
         }}
       >
-        <Toolbar /> {/* push content below AppBar */}
+        <Toolbar />
         {children}
       </Box>
     </Box>
