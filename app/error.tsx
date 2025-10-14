@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Box, Button, Typography, Container, Avatar } from "@mui/material"
+import { Box, Button, Typography, Avatar } from "@mui/material"
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline"
 import RefreshIcon from "@mui/icons-material/Refresh"
 

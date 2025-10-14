@@ -13,10 +13,8 @@ import {
 } from "@mui/material"
 import Link from "next/link"
 import { useCurrentUser, useUpdateUser } from "@/hooks/use-user"
-import { useAuth } from "@/contexts/auth-context"
 
 export default function SettingsPage() {
-  const { user: authUser } = useAuth()
   const { data: currentUser, isLoading } = useCurrentUser()
   const updateUserMutation = useUpdateUser()
 

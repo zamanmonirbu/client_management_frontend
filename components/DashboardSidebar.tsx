@@ -30,7 +30,6 @@ import {
   Store as StoreIcon,
   PersonOutline as PersonOutlineIcon,
   Settings as SettingsIcon,
-  Home as HomeIcon,
   Notifications as NotificationsIcon,
   LogoutRounded,
   AdbOutlined,
