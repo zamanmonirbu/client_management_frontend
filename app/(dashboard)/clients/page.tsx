@@ -88,22 +88,29 @@ export default function ClientsPage() {
   const clients = data?.data || []
 
   return (
-    <Box sx={{ p: 4, bgcolor: "#f5f5f5", minHeight: "100vh" }}>
+    <Box sx={{ p: 4, bgcolor: "#f5f5f5", minHeight: "95vh", display: "flex", flexDirection: "column" }}>
       <PageBreadcrumbs />
-      <ActionButtons onDownloadCSV={handleDownloadCSV} />
-      <ClientsTable
-        clients={clients}
-        sortField={sortField}
-        sortDirection={sortDirection}
-        onSort={handleSort}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        page={page}
-        totalPages={totalPages}
-        total={total}
-        onPageChange={handlePageChange}
-      />
-      <PageFooter />
+
+      <Box sx={{ p: 4, bgcolor: "white", flexGrow: 1, borderRadius: 4 }}> {/* border-radius added */}
+        <ActionButtons onDownloadCSV={handleDownloadCSV} />
+        <ClientsTable
+          clients={clients}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          onPageChange={handlePageChange}
+        />
+      </Box>
+
+      <Box sx={{ mt: 2 }}>
+  <PageFooter />
+</Box>
     </Box>
+
   )
 }

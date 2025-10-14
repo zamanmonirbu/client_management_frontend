@@ -95,7 +95,10 @@ export default function AddClientPage() {
         />
       </Box>
 
-      <PageFooter />
+     <Box sx={{ mt: 2 }}>
+  <PageFooter />
+</Box>
+
     </Box>
   )
 }

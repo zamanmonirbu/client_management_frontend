@@ -31,32 +31,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await apiClient.post<{
-        user: User
+        user: User & { refreshToken?: string }
         accessToken: string
-        refreshToken: string
       }>("/users/login", { email, password })
 
       if (response.status && response.data) {
-        const { user, accessToken, refreshToken } = response.data
-        setAuthData(user, accessToken, refreshToken)
-        setUser(user)
+        const userWithToken = response.data.user
+        const accessToken = response.data.accessToken
+        const refreshToken = userWithToken.refreshToken || "" 
+
+        const { refreshToken: _, ...userWithoutToken } = userWithToken
+
+        setAuthData(userWithoutToken, accessToken, refreshToken)
+        setUser(userWithoutToken)
         router.push("/")
       } else {
         throw new Error(response.message || "Login failed")
       }
     } catch (error) {
-      console.error(" Login error:", error)
+      console.error("Login error:", error)
       throw error
     }
   }
 
   const logout = async () => {
     try {
-      await apiClient.post("/users/logout")
+      await apiClient.post("/users/logout") 
     } catch (error) {
-      console.error(" Logout error:", error)
+      console.error("Logout error:", error)
     } finally {
-      clearAuthData()
+      clearAuthData() 
       setUser(null)
       router.push("/login")
     }

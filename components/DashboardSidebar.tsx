@@ -1,10 +1,11 @@
+//Compoenent: @compoenent/DashboardSidebar
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import React, { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
+
 import {
   Box,
   Drawer,
@@ -18,6 +19,8 @@ import {
   IconButton,
   Avatar,
   Badge,
+  Menu,
+  MenuItem,
 } from "@mui/material"
 import {
   Dashboard as DashboardIcon,
@@ -29,11 +32,14 @@ import {
   Settings as SettingsIcon,
   Home as HomeIcon,
   Notifications as NotificationsIcon,
-  Menu as MenuIcon,
+  LogoutRounded,
+  AdbOutlined,
 } from "@mui/icons-material"
 import Image from "next/image"
+import { useAuth } from "@/contexts/auth-context"
 
 const DRAWER_WIDTH = 240
+const APPBAR_HEIGHT = 64
 
 const menuItems = [
   { label: "Dashboard", icon: DashboardIcon, href: "/#" },
@@ -48,72 +54,27 @@ const menuItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const { user: authUser, logout } = useAuth()
+  const open = Boolean(anchorEl)
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
+  if (!authUser) return null
+
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen)
+  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget)
+  const handleProfileClose = () => setAnchorEl(null)
+
+  const handleLogout = async () => {
+    await logout()
+    window.location.reload()
   }
 
   const drawer = (
-    <Box sx={{ height: "100%", bgcolor: "#f8f9f8" }}>
-      {/* Logo */}
-      {/* <Box
-        sx={{
-          p: 2.5,
-          display: "flex",
-          alignItems: "center",
-          bgcolor: "#8b9d8a",
-        }}
-      >
-        <Box
-          sx={{
-            bgcolor: "white",
-            px: 2,
-            py: 1,
-            borderRadius: 1,
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
-          <Box
-            sx={{
-              width: 24,
-              height: 24,
-              bgcolor: "#8b9d8a",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontWeight: "bold",
-              color: "white",
-            }}
-          >
-            R xx
-          </Box>
-          <Box>
-            <Box sx={{ fontSize: "16px", fontWeight: "bold", color: "#2d3a2d", lineHeight: 1 }}>
-              REAL<span style={{ color: "#8b9d8a" }}>SEO</span>
-            </Box>
-            <Box sx={{ fontSize: "8px", color: "#666", letterSpacing: "0.5px" }}>
-              THE POWER BEHIND YOUR ONLINE PRESENCE
-            </Box>
-          </Box>
-        </Box>
-      </Box> */}
-
-<div className="bg-[#8b9d8a] p-1 h-[90px]">
-     <Image className="h-[50px] mt-5"  src="/seologo.png" alt="Dashboard Illustration" width={240} height={120} style={{ objectFit: "cover", width: "100%", marginBottom: 16 }} />
-</div>
-
- 
-
-      {/* Menu Items */}
-      <List sx={{ px: 1, pt: 2 }}>
+    <Box sx={{ height: "100%", bgcolor: "white", pt: 2 }}>
+      <List sx={{ px: 1 }}>
         {menuItems.map((item) => {
           const isActive = pathname === item.href || pathname?.startsWith(item.href + "/")
           const Icon = item.icon
-
           return (
             <ListItem key={item.label} disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
@@ -123,12 +84,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   borderRadius: 1,
                   bgcolor: isActive ? "#8b9d8a" : "transparent",
                   color: isActive ? "white" : "#5a6b59",
-                  "&:hover": {
-                    bgcolor: isActive ? "#7a8c79" : "#e8ede8",
-                  },
-                  "& .MuiListItemIcon-root": {
-                    color: isActive ? "white" : "#5a6b59",
-                  },
+                  "&:hover": { bgcolor: isActive ? "#7a8c79" : "#e8ede8" },
+                  "& .MuiListItemIcon-root": { color: isActive ? "white" : "#5a6b59" },
                 }}
               >
                 <ListItemIcon sx={{ minWidth: 40 }}>
@@ -136,102 +93,166 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </ListItemIcon>
                 <ListItemText
                   primary={item.label}
-                  primaryTypographyProps={{
-                    fontSize: "14px",
-                    fontWeight: isActive ? 600 : 400,
-                  }}
+                  primaryTypographyProps={{ fontSize: "14px", fontWeight: isActive ? 600 : 400 }}
                 />
               </ListItemButton>
             </ListItem>
           )
         })}
+
+        <ListItem disablePadding sx={{ mt: 1 }}>
+          <ListItemButton
+            onClick={handleLogout}
+            sx={{
+              borderRadius: 1,
+              color: "#d32f2f",
+              "&:hover": { bgcolor: "#ffebee" },
+              "& .MuiListItemIcon-root": { color: "#d32f2f" },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <LogoutRounded fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Logout" primaryTypographyProps={{ fontSize: "14px" }} />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Box>
   )
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      {/* Top AppBar */}
+      {/* AppBar */}
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
-          ml: { sm: `${DRAWER_WIDTH}px` },
+          width: "100%",
           bgcolor: "#8b9d8a",
           boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
         }}
       >
-        <Toolbar className=" h-[90px]" sx={{ justifyContent: "space-between" }}>
-          <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: "none" } }}>
-            <MenuIcon />
-          </IconButton>
+        <Toolbar sx={{ justifyContent: "space-between", minHeight: APPBAR_HEIGHT, px: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <Box sx={{ mt: 1 }}> {/* Add margin top */}
+              <Image
+                src="/seologo.png"
+                alt="Dashboard Logo"
+                width={200}
+                height={40}
+                style={{ objectFit: "contain" }}
+              />
+            </Box>
 
-          <Box sx={{ flex: 1 }} />
+            <Image
+              src="/menu.png"
+              alt="Menu"
+              width={30}
+              height={30}
+              style={{ objectFit: "contain" }}
+            />
+          </Box>
 
-          {/* Right side icons */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <IconButton color="inherit" size="small">
-              <HomeIcon />
+
+          {/* Right Section */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <IconButton
+              color="inherit"
+              size="small"
+              sx={{
+                bgcolor: "#4D5746",
+                color: "#FFFFFF",
+                width: 34,
+                height: 34,
+                p: 1,
+                "&:hover": { bgcolor: "#3b4336" },
+              }}
+            >
+              <AdbOutlined />
             </IconButton>
-            <IconButton color="inherit" size="small">
+
+            <IconButton
+              color="inherit"
+              size="small"
+              sx={{
+                bgcolor: "#4D5746",
+                color: "#FFFFFF",
+                width: 34,
+                height: 34,
+                p: 1,
+                "&:hover": { bgcolor: "#3b4336" },
+              }}
+            >
               <Badge badgeContent={3} color="error">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
-            <IconButton color="inherit" size="small">
+
+            <IconButton
+              color="inherit"
+              size="small"
+              sx={{
+                bgcolor: "#4D5746",
+                color: "#FFFFFF",
+                width: 34,
+                height: 34,
+                p: 1,
+                "&:hover": { bgcolor: "#3b4336" },
+              }}
+            >
               <SettingsIcon />
             </IconButton>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 1 }}>
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: "#6d7e6c",
-                  fontSize: "14px",
-                }}
-              >
-                DC
+
+            {/* Profile Dropdown */}
+            <Box
+              sx={{ display: "flex", alignItems: "center", cursor: "pointer", ml: 1 }}
+              onClick={handleProfileClick}
+            >
+              <Avatar sx={{ width: 32, height: 32, bgcolor: "#6d7e6c", fontSize: "14px", mr: 1 }}>
+                {authUser?.name?.[0] || "U"}
               </Avatar>
-              <Box sx={{ display: { xs: "none", md: "block" } }}>
-                <Box sx={{ fontSize: "14px", fontWeight: 500, lineHeight: 1.2 }}>David K. Croxton</Box>
-              </Box>
+              <span style={{ color: "white", fontSize: "14px", fontWeight: 500, marginRight: 4 }}>
+                {authUser?.name || "User"}
+              </span>
+              <ExpandMoreIcon sx={{ color: "white", fontSize: 20 }} />
             </Box>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleProfileClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Menu>
           </Box>
+
         </Toolbar>
       </AppBar>
 
-      {/* Sidebar Drawer */}
+      {/* Sidebar */}
       <Box component="nav" sx={{ width: { sm: DRAWER_WIDTH }, flexShrink: { sm: 0 } }}>
-        {/* Mobile drawer */}
+        {/* Mobile Drawer */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
+          ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: "block", sm: "none" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: DRAWER_WIDTH,
-              border: "none",
-            },
+            "& .MuiDrawer-paper": { boxSizing: "border-box", width: DRAWER_WIDTH, border: "none", mt: `${APPBAR_HEIGHT}px` },
           }}
         >
           {drawer}
         </Drawer>
 
-        {/* Desktop drawer */}
+        {/* Permanent Drawer */}
         <Drawer
           variant="permanent"
           sx={{
             display: { xs: "none", sm: "block" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: DRAWER_WIDTH,
-              border: "none",
-            },
+            "& .MuiDrawer-paper": { boxSizing: "border-box", width: DRAWER_WIDTH, border: "none", mt: `${APPBAR_HEIGHT}px` },
           }}
           open
         >
@@ -239,7 +260,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </Drawer>
       </Box>
 
-      {/* Main content */}
+      {/* Main Content */}
       <Box
         component="main"
         sx={{
@@ -247,9 +268,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
           minHeight: "100vh",
           bgcolor: "#f5f5f5",
+          pt: 3,
+          pb: 3,
         }}
       >
-        <Toolbar />
+        <Toolbar /> {/* push content below AppBar */}
         {children}
       </Box>
     </Box>

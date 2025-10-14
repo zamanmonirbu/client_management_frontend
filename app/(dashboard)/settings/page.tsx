@@ -1,23 +1,27 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { Box, TextField, Button, Typography, Breadcrumbs, Alert, CircularProgress, Paper } from "@mui/material"
+import React, { useState, useEffect } from "react"
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  TextField,
+  Alert,
+  CircularProgress,
+  Breadcrumbs,
+} from "@mui/material"
 import Link from "next/link"
 import { useCurrentUser, useUpdateUser } from "@/hooks/use-user"
-// import { useAuth } from "@/contexts/auth-context"
+import { useAuth } from "@/contexts/auth-context"
 
 export default function SettingsPage() {
-  // const { user: authUser } = useAuth()
+  const { user: authUser } = useAuth()
   const { data: currentUser, isLoading } = useCurrentUser()
   const updateUserMutation = useUpdateUser()
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  })
+  const [editMode, setEditMode] = useState(false)
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" })
   const [success, setSuccess] = useState("")
   const [error, setError] = useState("")
 
@@ -47,11 +51,7 @@ export default function SettingsPage() {
         name: formData.name,
         email: formData.email,
       }
-
-      // Only include password if it's been changed
-      if (formData.password) {
-        updateData.password = formData.password
-      }
+      if (formData.password) updateData.password = formData.password
 
       await updateUserMutation.mutateAsync({
         id: currentUser.id,
@@ -60,6 +60,7 @@ export default function SettingsPage() {
 
       setSuccess("Profile updated successfully!")
       setFormData((prev) => ({ ...prev, password: "" }))
+      setEditMode(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update profile")
     }
@@ -82,19 +83,19 @@ export default function SettingsPage() {
         <Typography color="text.primary">Settings</Typography>
       </Breadcrumbs>
 
-      <Paper sx={{ p: 4, maxWidth: 600 }}>
+      <Paper sx={{ p: 4, maxWidth: 600, mx: "auto", borderRadius: 3, boxShadow: "0 3px 10px rgba(0,0,0,0.1)" }}>
         <Typography
           variant="h5"
           sx={{
-            mb: 4,
+            mb: 3,
             fontWeight: 600,
             color: "#2d3a2d",
-            borderBottom: "3px solid #2d3a2d",
+            borderBottom: "3px solid #8b9d8a",
             display: "inline-block",
             pb: 0.5,
           }}
         >
-          User Settings
+          Admin Profile
         </Typography>
 
         {success && (
@@ -109,97 +110,72 @@ export default function SettingsPage() {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <TextField
-              fullWidth
-              label="Name"
-              value={formData.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-              required
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "&:hover fieldset": {
-                    borderColor: "#8b9d8a",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#8b9d8a",
-                  },
-                },
-              }}
-            />
+        {!editMode ? (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Typography>
+              <strong>Name:</strong> {currentUser?.name}
+            </Typography>
+            <Typography>
+              <strong>Email:</strong> {currentUser?.email}
+            </Typography>
+            <Typography>
+              <strong>Role:</strong> {currentUser?.role}
+            </Typography>
+            <Typography>
+              <strong>Account Created:</strong>{" "}
+              {currentUser?.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : "N/A"}
+            </Typography>
 
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              required
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "&:hover fieldset": {
-                    borderColor: "#8b9d8a",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#8b9d8a",
-                  },
-                },
-              }}
-            />
-
-            <TextField
-              fullWidth
-              label="New Password (leave blank to keep current)"
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleChange("password", e.target.value)}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "&:hover fieldset": {
-                    borderColor: "#8b9d8a",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#8b9d8a",
-                  },
-                },
-              }}
-            />
-
-            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={updateUserMutation.isPending}
-                sx={{
-                  bgcolor: "#8b9d8a",
-                  color: "white",
-                  px: 4,
-                  py: 1.5,
-                  fontWeight: 500,
-                  "&:hover": {
-                    bgcolor: "#6d7e6c",
-                  },
-                }}
-              >
-                {updateUserMutation.isPending ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Save Changes"}
-              </Button>
-            </Box>
+            <Button
+              variant="contained"
+              sx={{ mt: 3, bgcolor: "#8b9d8a", "&:hover": { bgcolor: "#6d7e6c" } }}
+              onClick={() => setEditMode(true)}
+            >
+              Update Profile
+            </Button>
           </Box>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <TextField
+                fullWidth
+                label="Name"
+                value={formData.name}
+                onChange={(e) => handleChange("name", e.target.value)}
+                required
+              />
+              <TextField
+                fullWidth
+                label="Email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange("email", e.target.value)}
+                required
+              />
+              <TextField
+                fullWidth
+                label="New Password (leave blank to keep current)"
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleChange("password", e.target.value)}
+              />
 
-        <Box sx={{ mt: 4, pt: 3, borderTop: "1px solid #e0e0e0" }}>
-          <Typography variant="body2" color="text.secondary">
-            <strong>User ID:</strong> {currentUser?.id}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            <strong>Role:</strong> {currentUser?.role}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            <strong>Account Created:</strong>{" "}
-            {currentUser?.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : "N/A"}
-          </Typography>
-        </Box>
+              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={updateUserMutation.isPending}
+                  sx={{ bgcolor: "#8b9d8a", "&:hover": { bgcolor: "#6d7e6c" } }}
+                >
+                  {updateUserMutation.isPending ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Save Changes"}
+                </Button>
+                <Button variant="outlined" onClick={() => setEditMode(false)}>
+                  Cancel
+                </Button>
+              </Box>
+            </Box>
+          </form>
+        )}
       </Paper>
     </Box>
   )
