@@ -32,24 +32,26 @@ export default function ClientsPage() {
     }
   }
 
-  const handleDownloadCSV = async () => {
-    if (!data?.data) return
+const handleDownloadCSV = async () => {
+  if (!data?.data) return
 
-    try {
-      const allClientsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/clients?page=1&limit=1000`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      })
-      const allClientsData = await allClientsResponse.json()
+  try {
+    const allClientsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/clients?page=1&limit=1000`, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+      },
+    })
 
-      if (allClientsData.status && allClientsData.data?.data) {
-        exportClientsToCSV(allClientsData.data.data)
-      }
-    } catch (error) {
-      console.error("CSV download failed:", error)
+    const allClientsData = await allClientsResponse.json()
+
+    if (allClientsData.status && allClientsData.data?.data) {
+      exportClientsToCSV(allClientsData.data.data)
     }
+  } catch (error) {
+    console.error("CSV download failed:", error)
   }
+}
+
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage)

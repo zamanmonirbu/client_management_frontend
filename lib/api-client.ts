@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL!
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!
 
 interface ApiResponse<T> {
   status: boolean
@@ -17,25 +16,25 @@ class ApiClient {
 
   private getAccessToken(): string | null {
     if (typeof window === "undefined") return null
-    return localStorage.getItem("accessToken")
+    return sessionStorage.getItem("accessToken")
   }
 
   private getRefreshToken(): string | null {
     if (typeof window === "undefined") return null
-    return localStorage.getItem("refreshToken")
+    return sessionStorage.getItem("refreshToken")
   }
 
   private setTokens(accessToken: string, refreshToken: string): void {
     if (typeof window === "undefined") return
-    localStorage.setItem("accessToken", accessToken)
-    localStorage.setItem("refreshToken", refreshToken)
+    sessionStorage.setItem("accessToken", accessToken)
+    sessionStorage.setItem("refreshToken", refreshToken)
   }
 
   private clearTokens(): void {
     if (typeof window === "undefined") return
-    localStorage.removeItem("accessToken")
-    localStorage.removeItem("refreshToken")
-    localStorage.removeItem("user")
+    sessionStorage.removeItem("accessToken")
+    sessionStorage.removeItem("refreshToken")
+    sessionStorage.removeItem("user")
   }
 
   private async refreshAccessToken(): Promise<boolean> {
@@ -45,9 +44,7 @@ class ApiClient {
     try {
       const response = await fetch(`${this.baseURL}/users/refresh`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       })
 
@@ -56,8 +53,7 @@ class ApiClient {
         return false
       }
 
-      const result: ApiResponse<{ accessToken: string; refreshToken: string }> =
-        await response.json()
+      const result: ApiResponse<{ accessToken: string; refreshToken: string }> = await response.json()
 
       if (result.status && result.data) {
         this.setTokens(result.data.accessToken, result.data.refreshToken)
@@ -75,7 +71,6 @@ class ApiClient {
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const accessToken = this.getAccessToken()
 
-    // ✅ Use Record<string, string> to allow direct mutation
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       ...(options.headers as Record<string, string>),
@@ -91,25 +86,15 @@ class ApiClient {
         headers,
       })
 
-      // Handle expired access token (401)
       if (response.status === 401) {
         const refreshed = await this.refreshAccessToken()
-
         if (refreshed) {
           const newAccessToken = this.getAccessToken()
-          if (newAccessToken) {
-            headers["Authorization"] = `Bearer ${newAccessToken}`
-          }
+          if (newAccessToken) headers["Authorization"] = `Bearer ${newAccessToken}`
 
-          response = await fetch(`${this.baseURL}${endpoint}`, {
-            ...options,
-            headers,
-          })
+          response = await fetch(`${this.baseURL}${endpoint}`, { ...options, headers })
         } else {
-          // Redirect to login if refresh fails
-          if (typeof window !== "undefined") {
-            window.location.href = "/login"
-          }
+          if (typeof window !== "undefined") window.location.href = "/login"
           throw new Error("Authentication failed")
         }
       }
